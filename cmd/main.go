@@ -7,6 +7,7 @@ import (
 	"github.com/v1c-g4b/digital-monster-api/config"
 	db "github.com/v1c-g4b/digital-monster-api/db/migrations"
 	"github.com/v1c-g4b/digital-monster-api/internal/monster"
+	"github.com/v1c-g4b/digital-monster-api/internal/monster/entity"
 )
 
 func main() {
@@ -17,7 +18,7 @@ func main() {
 
 	dbConn := db.Connect(cfg.Database.Path)
 
-	dbConn.AutoMigrate(&monster.Monster{})
+	dbConn.AutoMigrate(&entity.Monster{})
 
 	go monster.StartDecayRoutine(dbConn)
 

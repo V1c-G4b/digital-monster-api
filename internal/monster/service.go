@@ -3,6 +3,7 @@ package monster
 import (
 	"time"
 
+	"github.com/v1c-g4b/digital-monster-api/internal/monster/entity"
 	"gorm.io/gorm"
 )
 
@@ -10,7 +11,7 @@ func StartDecayRoutine(db *gorm.DB) {
 	ticker := time.NewTicker(1 * time.Minute)
 
 	for range ticker.C {
-		var monsters []Monster
+		var monsters []entity.Monster
 
 		db.Where("is_alive= ?", true).Find(&monsters)
 
@@ -30,5 +31,15 @@ func StartDecayRoutine(db *gorm.DB) {
 			m.LastUpdated = time.Now()
 			db.Save(&m)
 		}
+	}
+}
+
+func StartExploreRoutine(db *gorm.DB) {
+	ticker := time.NewTicker(1 * time.Minute)
+
+	for range ticker.C {
+		var monsters []entity.Monster
+
+		db.Where("is_alive= ?", true).Find(&monsters)
 	}
 }
