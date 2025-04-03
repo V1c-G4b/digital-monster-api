@@ -18,6 +18,8 @@ type Monster struct {
 	Stage       string    `gorm:"size:50;not null"`
 	IsAlive     bool      `gorm:"not null"`
 	LastUpdated time.Time `gorm:"not null"`
+
+	domainEvents []DomainEvent
 }
 
 func (m *Monster) Feed() error {
@@ -83,4 +85,21 @@ func (m *Monster) Sleep() error {
 	}
 
 	return nil
+}
+
+func (m *Monster) AddEvent(event DomainEvent) {
+	m.domainEvents = append(m.domainEvents, event)
+}
+
+func (m *Monster) PullEvents() []DomainEvent {
+	events := m.domainEvents
+	m.domainEvents = []DomainEvent{}
+	return events
+}
+
+func (m *Monster) Die() {
+	if m.IsAlive {
+		m.IsAlive = false
+		m.AddEvent(MonsterDiedEvent{MonsterID: m.ID.String()})
+	}
 }
