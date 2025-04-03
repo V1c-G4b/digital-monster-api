@@ -9,23 +9,33 @@ import (
 
 func StartDecayRoutine(db *gorm.DB) {
 	ticker := time.NewTicker(1 * time.Minute)
-
+	dispatcher := entity.NewEventDispatcher()
 	for range ticker.C {
-		var monsters []entity.Monster
+		var monster []entity.Monster
 
-		db.Where("is_alive= ?", true).Find(&monsters)
+		db.Where("is_alive= ?", true).Find(&monster)
 
-		for _, m := range monsters {
+		for _, m := range monster {
 			m.Hunger += 5
 			m.Happiness -= 3
 			m.Energy -= 2
 
+			if m.Happiness < 0 {
+				m.Happiness = 0
+			}
+
+			if m.Energy < 0 {
+				m.Energy = 0
+			}
+
 			if m.Hunger > 100 {
+				m.Hunger = 100
 				m.Health -= 5
 			}
 
-			if m.Health <= 0 {
+			if m.Health <= 0 && m.IsAlive {
 				m.IsAlive = false
+				dispatcher.Dispatch(entity.MonsterDiedEvent{MonsterID: m.ID.String()})
 			}
 
 			m.LastUpdated = time.Now()
